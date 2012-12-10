@@ -1,24 +1,27 @@
 package suba
 
 import (
-	"strings"
 	"errors"
+	"strings"
 )
 
-type Route struct { Routes map[string]Handler }
+type Route struct{ Routes map[string]Handler }
 
 func NewRoute() Route {
 	return Route{map[string]Handler{}}
 }
 
+// Handle the given command with a handler function
 func (r Route) Add(s string, f HF) {
-	r.Routes[s] = HContainer{ f }
+	r.Routes[s] = HContainer{f}
 }
 
+// Handle the given command with a sub-handler
 func (r Route) Sub(s string, h Handler) {
 	r.Routes[s] = h
 }
 
+// Returns the list of available commands for the given handler
 func (r Route) Options() []string {
 	keys := []string{}
 	for key := range r.Routes {
@@ -27,6 +30,8 @@ func (r Route) Options() []string {
 	return keys
 }
 
+// Method implementing `handler` interface by delegating to handler function or
+// sub-handler
 func (r Route) Accept(args ...string) error {
 	if len(args) > 0 {
 		arg := args[0]
@@ -37,4 +42,3 @@ func (r Route) Accept(args ...string) error {
 	}
 	return errors.New(strings.Join(r.Options(), "\n"))
 }
-

@@ -1,0 +1,70 @@
+PACKAGE
+
+package suba
+    import "suba"
+
+
+VARIABLES
+
+var INVALID_A error = errors.New("Invalid argument count")
+
+
+FUNCTIONS
+
+func Run(h Handler) error
+    Run a handler on default command line args
+
+
+TYPES
+
+type HContainer struct{ F HF }
+    Simple container for HFs to allow for interface implementation
+
+func (c HContainer) Accept(args ...string) error
+
+type HF func(...string) error
+    Shorthand for `handler function`. Every function that eventually takes
+    user input must have this function signature. Can be simplified through
+    the use of `Zero`, `One`, `Two`, and `Many` helper functions
+
+func One(f func(string) error) HF
+    Helper method that creates a HF from a one-argument function
+
+func Three(f func(string, string, string) error) HF
+    Helper method that creates a HF from a three-argument function
+
+func Two(f func(string, string) error) HF
+    Helper method that creates a HF from a two-argument function
+
+func Zero(f func() error) HF
+    Helper method that creates a HF from a zero-argument function
+
+type Handler interface {
+    Accept(...string) error
+}
+
+type Many map[int]HF
+    Helper type that allows for function switching based on argument length
+    count Useful for commands with optional arguments such as something like
+    `git push`
+
+func (m Many) Accept(args ...string) error
+
+type Route struct{ Routes map[string]Handler }
+
+func NewRoute() Route
+
+func (r Route) Accept(args ...string) error
+    Method implementing `handler` interface by delegating to handler
+    function or sub-handler
+
+func (r Route) Add(s string, f HF)
+    Handle the given command with a handler function
+
+func (r Route) Options() []string
+    Returns the list of available commands for the given handler
+
+func (r Route) Sub(s string, h Handler)
+    Handle the given command with a sub-handler
+
+
