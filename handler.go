@@ -1,3 +1,6 @@
+// Package suba - short for SUBcommand Argument parser - provides basic biulding
+// blocks to assemble a command line argument parser that uses git-style
+// subcommand based heirarchy of functions
 package suba
 
 import "errors"
