@@ -4,12 +4,13 @@ package suba
     import "github.com/dagoof/suba"
 
     Package suba - short for SUBcommand Argument parser - provides basic
-    biulding blocks to assemble a command line argument parser that uses
-    git-style subcommand based heirarchy of functions
+    components useful in assembling a command line argument parser that uses
+    a git-style subcommand based hierarchy of functions
 
 VARIABLES
 
 var INVALID_A error = errors.New("Invalid argument count")
+var INVALID_R error = errors.New("Invalid function result")
 
 
 FUNCTIONS
@@ -23,24 +24,16 @@ TYPES
 type HContainer struct{ F HF }
     Simple container for HFs to allow for interface implementation
 
-func (c HContainer) Accept(args ...string) error
+func (c HContainer) Accept(args ...string) (e error)
+    Does the heavy lifting of allowing any function which accepts strings
+    and returns an error to be a valid handler function, using the magic of
+    reflection
 
-type HF func(...string) error
-    Shorthand for `handler function`. Every function that eventually takes
-    user input must have this function signature. Can be simplified through
-    the use of `Zero`, `One`, `Two`, and `Many` helper functions
-
-func One(f func(string) error) HF
-    Helper method that creates a HF from a one-argument function
-
-func Three(f func(string, string, string) error) HF
-    Helper method that creates a HF from a three-argument function
-
-func Two(f func(string, string) error) HF
-    Helper method that creates a HF from a two-argument function
-
-func Zero(f func() error) HF
-    Helper method that creates a HF from a zero-argument function
+type HF interface{}
+    Shorthand for `handler function`. Although this is defined by an empty
+    interface, any function which handles user input must accept some number
+    of strings as arguments and return an error (which is then typically
+    displayed to stdout)
 
 type Handler interface {
     Accept(...string) error
@@ -56,6 +49,7 @@ func (m Many) Accept(args ...string) error
 type Route struct{ Routes map[string]Handler }
 
 func NewRoute() Route
+    Create an empty route
 
 func (r Route) Accept(args ...string) error
     Method implementing `handler` interface by delegating to handler

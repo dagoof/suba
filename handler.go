@@ -16,14 +16,17 @@ type Handler interface {
 }
 
 // Shorthand for `handler function`.
-// Every function that eventually takes user input must have this
-// function signature. Can be simplified through the use of 
-// `Zero`, `One`, `Two`, and `Many` helper functions
+// Although this is defined by an empty interface, any function which handles
+// user input must accept some number of strings as arguments and return an
+// error (which is then typically displayed to stdout)
 type HF interface{}
 
 // Simple container for HFs to allow for interface implementation
 type HContainer struct{ F HF }
 
+// Does the heavy lifting of allowing any function which accepts strings and
+// returns an error to be a valid handler function, using the magic of
+// reflection
 func (c HContainer) Accept(args ...string) (e error) {
 	defer func() {
 		if r := recover(); r != nil {

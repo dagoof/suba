@@ -7,6 +7,7 @@ import (
 
 type Route struct{ Routes map[string]Handler }
 
+// Create an empty route
 func NewRoute() Route {
 	return Route{map[string]Handler{}}
 }
