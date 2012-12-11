@@ -3,9 +3,13 @@
 // uses a git-style subcommand based hierarchy of functions
 package suba
 
-import "errors"
+import (
+	"errors"
+	"reflect"
+)
 
 var INVALID_A error = errors.New("Invalid argument count")
+var INVALID_R error = errors.New("Invalid function result")
 
 type Handler interface {
 	Accept(...string) error
@@ -15,55 +19,30 @@ type Handler interface {
 // Every function that eventually takes user input must have this
 // function signature. Can be simplified through the use of 
 // `Zero`, `One`, `Two`, and `Many` helper functions
-type HF func(...string) error
+type HF interface{}
 
 // Simple container for HFs to allow for interface implementation
 type HContainer struct{ F HF }
 
-func (c HContainer) Accept(args ...string) error { return c.F(args...) }
-
-// Helper method that creates a HF from a zero-argument function
-func Zero(f func() error) HF {
-	g := func(args ...string) error {
-		if len(args) == 0 {
-			return f()
+func (c HContainer) Accept(args ...string) (e error) {
+	defer func() {
+		if r := recover(); r != nil {
+			e = INVALID_A
 		}
-		return INVALID_A
+	}()
+	vargs := []reflect.Value{}
+	for _, arg := range args {
+		vargs = append(vargs, reflect.ValueOf(arg))
 	}
-	return g
-}
-
-// Helper method that creates a HF from a one-argument function
-func One(f func(string) error) HF {
-	g := func(args ...string) error {
-		if len(args) == 1 {
-			return f(args[0])
-		}
-		return INVALID_A
+	rs := reflect.ValueOf(c.F).Call(vargs)
+	if len(rs) != 1 {
+		return INVALID_R
 	}
-	return g
-}
-
-// Helper method that creates a HF from a two-argument function
-func Two(f func(string, string) error) HF {
-	g := func(args ...string) error {
-		if len(args) == 2 {
-			return f(args[0], args[1])
-		}
-		return INVALID_A
+	r := rs[0]
+	if r.Interface() == nil {
+		return nil
 	}
-	return g
-}
-
-// Helper method that creates a HF from a three-argument function
-func Three(f func(string, string, string) error) HF {
-	g := func(args ...string) error {
-		if len(args) == 3 {
-			return f(args[0], args[1], args[2])
-		}
-		return INVALID_A
-	}
-	return g
+	return r.Interface().(error)
 }
 
 // Helper type that allows for function switching based on argument length count
@@ -72,7 +51,7 @@ type Many map[int]HF
 
 func (m Many) Accept(args ...string) error {
 	if f, ok := m[len(args)]; ok {
-		return f(args...)
+		return HContainer{ f }.Accept(args...)
 	}
 	return INVALID_A
 }
