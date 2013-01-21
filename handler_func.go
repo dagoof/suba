@@ -16,7 +16,7 @@ type Handler interface {
 	Handle(...string) error
 }
 
-// Shorthand for `handler function`.
+// Shorthand for "handler function".
 // Although this is defined by an empty interface, any function which handles
 // user input must accept some number of strings as arguments and return an
 // error (which is then typically displayed to stdout)

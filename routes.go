@@ -35,8 +35,8 @@ func (r Keyed) Handle(args ...string) error {
 	return errors.New(strings.Join(r.Options(), "\n"))
 }
 
-// Route functions based on argument length
-// Useful for commands with optional arguments such as something like `git push`
+// Route functions based on argument length.
+// Useful for commands with optional arguments such as something like "git push"
 type Counted map[int]HF
 
 // Counted analogue to Keyed `Assign`
