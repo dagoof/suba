@@ -60,8 +60,8 @@ func ExampleCompound() {
 
 func ExampleKeyed() {
 	files := map[string]bool{
-		"index.html": true,
-		"main.go": true,
+		"index.html":   true,
+		"main.go":      true,
 		".main.go.swp": false,
 	}
 	current := func() []string {
@@ -73,7 +73,6 @@ func ExampleKeyed() {
 		}
 		return fs
 	}
-
 
 	crud := Keyed{}
 	crud.Assign("create", func(name string) (e error) {
@@ -116,4 +115,3 @@ func ExampleKeyed() {
 	// Output: Current files are [main.go suba.go index.html]
 
 }
-

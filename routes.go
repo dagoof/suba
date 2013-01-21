@@ -44,7 +44,7 @@ func (r Counted) Set(i int, f HF) { r[i] = f }
 
 func (r Counted) Handle(args ...string) error {
 	if f, ok := r[len(args)]; ok {
-		return HContainer{ f }.Handle(args...)
+		return HContainer{f}.Handle(args...)
 	}
 	return INVALID_A
 }
@@ -61,7 +61,7 @@ type Compound struct {
 }
 
 func NewCompound() Compound {
-	return Compound{ Keyed{}, Counted{} }
+	return Compound{Keyed{}, Counted{}}
 }
 
 func (c Compound) Handle(args ...string) error {
