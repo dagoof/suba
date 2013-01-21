@@ -8,11 +8,12 @@ import (
 	"reflect"
 )
 
+var INVALID_F error = errors.New("Invalid function provided")
 var INVALID_A error = errors.New("Invalid argument count")
 var INVALID_R error = errors.New("Invalid function result")
 
 type Handler interface {
-	Accept(...string) error
+	Handle(...string) error
 }
 
 // Shorthand for `handler function`.
@@ -27,10 +28,11 @@ type HContainer struct{ F HF }
 // Does the heavy lifting of allowing any function which accepts strings and
 // returns an error to be a valid handler function, using the magic of
 // reflection
-func (c HContainer) Accept(args ...string) (e error) {
+func (c HContainer) Handle(args ...string) (e error) {
 	defer func() {
 		if r := recover(); r != nil {
-			e = INVALID_A
+			println(r)
+			e = INVALID_F
 		}
 	}()
 	vargs := []reflect.Value{}
@@ -48,13 +50,3 @@ func (c HContainer) Accept(args ...string) (e error) {
 	return r.Interface().(error)
 }
 
-// Helper type that allows for function switching based on argument length count
-// Useful for commands with optional arguments such as something like `git push`
-type Many map[int]HF
-
-func (m Many) Accept(args ...string) error {
-	if f, ok := m[len(args)]; ok {
-		return HContainer{ f }.Accept(args...)
-	}
-	return INVALID_A
-}
