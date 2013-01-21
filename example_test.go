@@ -64,11 +64,12 @@ func ExampleKeyed() {
 		"main.go":      true,
 		".main.go.swp": false,
 	}
+	f_keys := []string{"index.html", "main.go", ".main.go.swp"}
 	current := func() []string {
 		fs := []string{}
-		for k, v := range files {
-			if v {
-				fs = append(fs, k)
+		for _, key := range f_keys {
+			if file, ok := files[key]; ok && file {
+				fs = append(fs, key)
 			}
 		}
 		return fs
@@ -77,6 +78,7 @@ func ExampleKeyed() {
 	crud := Keyed{}
 	crud.Assign("create", func(name string) (e error) {
 		files[name] = true
+		f_keys = append(f_keys, name)
 		fmt.Printf("Created %s\n", name)
 		return
 	})
@@ -99,7 +101,7 @@ func ExampleKeyed() {
 			fmt.Printf("Deleted %s\n", name)
 			return
 		}
-		fmt.Printf("Could not update %s, does not exist\n", name)
+		fmt.Printf("Could not delete %s, does not exist\n", name)
 		return
 	})
 
@@ -110,8 +112,12 @@ func ExampleKeyed() {
 	crud.Handle(Args("read")...)
 	crud.Handle(Args("update .main.go.swp")...)
 	crud.Handle(Args("delete .main.go.swp")...)
-	// Output: Current files are [main.go index.html]
+	// Output: Current files are [index.html main.go]
 	// Created suba.go
-	// Output: Current files are [main.go suba.go index.html]
+	// Current files are [index.html main.go suba.go]
+	// Updated .main.go.swp to true
+	// Current files are [index.html main.go .main.go.swp suba.go]
+	// Updated .main.go.swp to false
+	// Could not delete .main.go.swp, does not exist
 
 }
